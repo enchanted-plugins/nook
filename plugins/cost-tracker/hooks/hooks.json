@@ -1,0 +1,39 @@
+{
+  "description": "cost-tracker hooks — observe every tool call, write ledger row, update rollups. Advisory-only per @shared/conduct/hooks.md: never blocks, never exit-non-zero, fails open.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/shared/scripts/session_init.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/shared/scripts/observe.py",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/shared/scripts/finalize_session.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

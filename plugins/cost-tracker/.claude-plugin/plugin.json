@@ -1,0 +1,22 @@
+{
+  "name": "cost-tracker",
+  "description": "L1 Exponential Smoothing Forecast + L4 Cache-Waste Measurement. Reads Claude API usage field at PostToolUse, attributes via ENCHANTED_ATTRIBUTION env, writes monthly JSONL ledger. Forecasts session/day/month spend with ±2σ confidence bands. Surfaces cache hit ratio + unread-write waste.",
+  "version": "0.1.0",
+  "author": {
+    "name": "enchanted-plugins"
+  },
+  "license": "MIT",
+  "keywords": [
+    "cost-tracking",
+    "observability",
+    "exponential-smoothing",
+    "prompt-cache",
+    "attribution",
+    "ledger"
+  ],
+  "skills": [
+    "./skills/observe-call/",
+    "./skills/forecast-cost/"
+  ],
+  "agents": "./agents/"
+}

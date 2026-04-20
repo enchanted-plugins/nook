@@ -6,6 +6,7 @@
   <img alt="5 engines" src="https://img.shields.io/badge/Engines-L1%E2%80%93L5-58a6ff?style=for-the-badge">
   <img alt="Phase 1 #5" src="https://img.shields.io/badge/Phase-1%20%23%205-d29922?style=for-the-badge">
   <img alt="Exponential Smoothing" src="https://img.shields.io/badge/Exponential-Smoothing-f0883e?style=for-the-badge">
+  <a href="https://www.repostatus.org/#wip"><img alt="Project Status: WIP" src="https://www.repostatus.org/badges/latest/wip.svg"></a>
 </p>
 
 > **An @enchanted-plugins product — algorithm-driven, agent-managed, self-learning.**
@@ -24,19 +25,35 @@ Nook takes its name from **Tom Nook of Animal Crossing** — the shopkeeper who 
 
 The question this plugin answers: *What did it cost?*
 
+## Who this is for
+
+- Teams who need *"where did the budget go?"* in per-plugin / per-tier / per-model granularity, not a single "org total" line.
+- Developers on a personal budget who want honest spend forecasts with confidence bands instead of dashboards that optimize for looking good.
+- Engineers who want peer plugins (Flux, Weaver, Allay) to **degrade** — not crash — when spend crosses a threshold.
+
+Not for:
+
+- Users satisfied with Anthropic's console for spend — if parent-thread aggregation is enough, Nook's attribution is overkill.
+- Closed-cloud teams who can't run local JSONL ledgers — Nook is machine-local by design.
+
 ## Contents
 
 - [How It Works](#how-it-works)
 - [What Makes Nook Different](#what-makes-nook-different)
 - [The Full Lifecycle](#the-full-lifecycle)
 - [Install](#install)
+- [Quickstart](#quickstart)
 - [5 Sub-Plugins, 5 Engines, 4 Slash Commands](#5-sub-plugins-5-engines-4-slash-commands)
 - [What You Get Per Session](#what-you-get-per-session)
+- [Roadmap](#roadmap)
 - [The Science Behind Nook](#the-science-behind-nook)
 - [vs Everything Else](#vs-everything-else)
 - [Agent Conduct (10 Modules)](#agent-conduct-10-modules)
 - [Architecture](#architecture)
+- [Acknowledgments](#acknowledgments)
+- [Versioning & release cadence](#versioning--release-cadence)
 - [Contributing](#contributing)
+- [Citation](#citation)
 - [License](#license)
 
 ## How It Works
@@ -140,6 +157,18 @@ Claude Code resolves the dependency list and installs all 5 sub-plugins. Verify 
 bash <(curl -s https://raw.githubusercontent.com/enchanted-plugins/nook/main/install.sh)
 ```
 
+## Quickstart
+
+Once v0.1.0 ships, a first cost report is a single command. Sixty seconds:
+
+```
+/plugin install full@nook
+# ...run any Claude Code session...
+/nook-cost
+```
+
+Expected: `/nook-cost` prints session spend broken down by plugin × sub-plugin × agent tier × model, with an L1 end-of-month forecast and a ±2σ confidence band against your configured ceiling. Peer plugins (Flux / Weaver / Allay) react automatically to L2 threshold events — no manual kill switch. See [docs/getting-started.md](docs/getting-started.md) for the full guided first run once the release lands.
+
 ## 5 Sub-Plugins, 5 Engines, 4 Slash Commands
 
 | Sub-plugin | Owns | Trigger | Agent |
@@ -176,6 +205,10 @@ Tool calls flow through four journals — one per sub-plugin — and converge on
 Source: [docs/assets/state-flow.mmd](docs/assets/state-flow.mmd) · Regeneration command in [docs/assets/README.md](docs/assets/README.md).
 
 </sub>
+
+## Roadmap
+
+Tracked in [docs/ROADMAP.md](docs/ROADMAP.md) and the shared [ecosystem map](https://github.com/enchanted-plugins/flux/blob/main/docs/ecosystem.md). For upcoming work specific to Nook, see issues tagged [roadmap](https://github.com/enchanted-plugins/nook/labels/roadmap).
 
 ```
 plugins/cost-tracker/state/
@@ -281,9 +314,40 @@ Interactive architecture explorer with sub-plugin diagrams, agent cards, and eve
 
 **[docs/architecture/](docs/architecture/)** — auto-generated from the codebase. Run `python docs/architecture/generate.py` to regenerate.
 
+## Acknowledgments
+
+Nook builds on foundations laid by others:
+
+- **[Claude Code](https://github.com/anthropics/claude-code)** (Anthropic) — the plugin surface this work extends.
+- **[Keep a Changelog](https://keepachangelog.com/)** — CHANGELOG convention.
+- **[Semantic Versioning](https://semver.org/)** — versioning contract.
+- **[Contributor Covenant](https://www.contributor-covenant.org/)** — Code of Conduct.
+- **[repostatus.org](https://www.repostatus.org/)** — status badge.
+- **[Citation File Format](https://citation-file-format.github.io/)** — citation metadata.
+- **[Conventional Commits](https://www.conventionalcommits.org/)** — commit convention.
+
+## Versioning & release cadence
+
+Nook follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Breaking changes land on major bumps only; the [CHANGELOG](CHANGELOG.md) flags them explicitly. Release cadence is opportunistic — tags land when accumulated fixes or features justify a cut, not on a fixed schedule. Migration notes between majors live in [docs/upgrading.md](docs/upgrading.md).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Citation
+
+If you use this project in research or derivative work, please cite it:
+
+```bibtex
+@software{nook_2026,
+  title = {Nook},
+  author = {{Klaiderman}},
+  year = {2026},
+  url = {https://github.com/enchanted-plugins/nook}
+}
+```
+
+See [CITATION.cff](CITATION.cff) for additional formats (APA, MLA, EndNote).
 
 ## License
 

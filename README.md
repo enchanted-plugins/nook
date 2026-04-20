@@ -39,48 +39,21 @@ Nook doesn't just track spend. It **attributes** — every token, every prompt-c
 
 The core innovation is the **attribution contract**: every enchanted-plugins sibling that dispatches work sets the `ENCHANTED_ATTRIBUTION` environment variable before the call. Nook reads it at `PostToolUse`, looks up the model in `shared/rate-card.json`, applies the prompt-cache modifiers (writes at 1.25×, reads at 0.1×, batch at 0.5×), and writes a ledger row. What Anthropic's console shows as one line of "org total" becomes thirty lines of per-plugin-per-tier-per-model reality.
 
-```
-                                     ┌────────────────────────────┐
-                                     │   Claude Code session      │
-                                     └──────────────┬─────────────┘
-                                                    │ PostToolUse + ENCHANTED_ATTRIBUTION
-                                                    ▼
-                          ┌──────────────────────────────────────────────────┐
-                          │                        Nook                      │
-                          │                                                  │
-   ┌─────────────────┐    │   ┌──────────────┐    ┌────────────────────┐    │
-   │ rate-card-      │◀───┼───│ cost-tracker │───▶│  budget-watcher    │    │
-   │ keeper          │    │   │ (L1, L4)     │    │  (L2, L3)          │    │
-   │ rate-card.json  │    │   │ ledger.jsonl │    │  budgets.json      │    │
-   └─────────────────┘    │   └──────┬───────┘    └─────────┬──────────┘    │
-                          │          │                      │               │
-                          │          ▼                      ▼               │
-                          │   ┌──────────────┐    ┌────────────────────┐    │
-                          │   │ nook-learning│    │    cost-query      │    │
-                          │   │ (L5)         │    │ /nook-{cost,       │    │
-                          │   │ learnings    │    │  forecast,         │    │
-                          │   │              │    │  attribute,        │    │
-                          │   │              │    │  report}           │    │
-                          │   └──────────────┘    └────────────────────┘    │
-                          │                                                  │
-                          └──────────────────┬───────────────────────────────┘
-                                             │ threshold + rollup events only
-                                             ▼ (never per-call)
-                                  ┌──────────────────────┐
-                                  │  enchanted-mcp bus   │
-                                  │  nook.budget.*       │
-                                  │  nook.anomaly.*      │
-                                  └──────────┬───────────┘
-                           ┌─────────────────┼─────────────────┐
-                           ▼                 ▼                 ▼
-                      ┌─────────┐      ┌─────────┐       ┌─────────┐
-                      │  Flux   │      │ Weaver  │       │  Allay  │
-                      │ → Haiku │      │ → defer │       │ → trim  │
-                      │         │      │   polish│       │   ctx   │
-                      └─────────┘      └─────────┘       └─────────┘
-```
+The diagram below shows the five-subplugin architecture: a Claude Code session flows into `cost-tracker` (L1 + L4 — the primary hook consumer), which feeds `budget-watcher` (L2 + L3 — threshold + anomaly detection) and `nook-learning` (L5 — cross-session pattern accumulation). `rate-card-keeper` holds the committed rate card; `cost-query` is the skill-invoked developer surface. Events hit the enchanted-mcp bus only on threshold crossings and rollups — peer plugins (Flux, Weaver, Allay) subscribe and degrade gracefully.
 
-The diagram will become a rendered blueprint SVG once `python docs/architecture/generate.py` runs against the sub-plugin source-of-truth — see [docs/architecture/](docs/architecture/).
+<p align="center">
+  <a href="docs/assets/pipeline.mmd" title="View pipeline source (Mermaid)">
+    <img src="docs/assets/pipeline.svg"
+         alt="Nook five-subplugin architecture blueprint — title block, Claude Code session input, cost-tracker (L1+L4), budget-watcher (L2+L3), rate-card-keeper + nook-learning + cost-query support row, enchanted-mcp bus events, and peer-degradation legend"
+         width="100%" style="max-width: 1100px;">
+  </a>
+</p>
+
+<sub align="center">
+
+Source: [docs/assets/pipeline.mmd](docs/assets/pipeline.mmd) · Regeneration command in [docs/assets/README.md](docs/assets/README.md).
+
+</sub>
 
 No permission prompts. No manual ledgering. You work; Nook observes, tags, forecasts, and alerts.
 
@@ -122,39 +95,23 @@ Brand invariant: hooks are bash+jq, scripts are Python stdlib. No external runti
 
 ## The Full Lifecycle
 
-A call flows through Nook in four stages: **SessionStart** loads the rate card (`rate-card-keeper`) and mints the session ID (`cost-tracker`). **PostToolUse** reads API `usage` + `ENCHANTED_ATTRIBUTION`, computes cost with cache modifiers, writes the ledger row (`cost-tracker`), then runs L2 threshold + L3 anomaly detection (`budget-watcher`). **PreCompact** persists the session's patterns into `learnings.json` for future L3 priors (`nook-learning`). **Stop** emits `nook.session.cost.finalized` with the daily rollup (`cost-tracker`).
+A call flows through Nook in four stages moving top to bottom: **SessionStart** (Haiku) loads the committed rate card and mints the session ID; **PostToolUse** (Haiku, repeated per tool call) parses API usage + attribution env, writes the ledger row, then runs L2 threshold + L3 anomaly detection; **PreCompact** (Sonnet) persists per-developer spend patterns via L5's slow α=0.05 accumulator before compaction wipes in-memory state; **Stop** (Haiku) finalizes the daily rollup and emits `nook.session.cost.finalized`. Throughout, the developer can pull spend state on-demand via `/nook-{cost,forecast,attribute,report}` — the query surface is orthogonal to the observation path.
 
-```
-   SessionStart                PostToolUse                PreCompact     Stop
-   ────────────                ───────────                ──────────    ────
-       │                            │                          │          │
-       ▼                            ▼                          ▼          ▼
-┌──────────────┐           ┌───────────────────┐        ┌────────────┐  ┌──────────┐
-│ rate-card-   │           │   cost-tracker    │        │   nook-    │  │  cost-   │
-│ keeper       │           │   observe.py      │        │   learning │  │  tracker │
-│              │           │   ├─ parse usage  │        │            │  │          │
-│ validate     │           │   ├─ attribute    │        │ L5 α=0.05  │  │ finalize │
-│ schema +     │──────────▶│   ├─ compute cost │───────▶│ accumulate │─▶│ rollup + │
-│ staleness    │   rate    │   └─ write ledger │  L1    │            │  │ event    │
-│              │   card    │                   │  fore- │            │  │          │
-│              │           │  budget-watcher   │  cast  │            │  │          │
-│              │           │   check_budget.py │        │            │  │          │
-│              │           │   ├─ L2 threshold │        │            │  │          │
-│              │           │   └─ L3 anomaly   │        │            │  │          │
-└──────────────┘           └─────────┬─────────┘        └────────────┘  └──────────┘
-                                     │
-                                     │ threshold/anomaly events (debounced)
-                                     ▼
-                        nook.budget.threshold.crossed
-                        nook.anomaly.detected
-                                     │
-                                     ▼
-                        peer plugins degrade gracefully
-```
+<p align="center">
+  <a href="docs/assets/lifecycle.mmd" title="View lifecycle source (Mermaid)">
+    <img src="docs/assets/lifecycle.svg"
+         alt="Nook session lifecycle blueprint — 4 stages SessionStart → PostToolUse (×N) → PreCompact → Stop, plus orthogonal skill-invoked Cost Query surface"
+         width="100%" style="max-width: 1100px;">
+  </a>
+</p>
 
-Query anytime with `/nook-cost`, `/nook-forecast`, `/nook-attribute`, `/nook-report`. Every stage is autonomous; the developer surface is pull, not push.
+<sub align="center">
 
-The ASCII lifecycle becomes a rendered blueprint SVG once `python docs/architecture/generate.py` runs against the sub-plugin source-of-truth.
+Source: [docs/assets/lifecycle.mmd](docs/assets/lifecycle.mmd) · Regeneration command in [docs/assets/README.md](docs/assets/README.md).
+
+</sub>
+
+Every stage is autonomous; the developer surface is pull, not push.
 
 ## Install
 

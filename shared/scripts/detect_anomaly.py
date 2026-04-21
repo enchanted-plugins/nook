@@ -10,6 +10,7 @@ Emits nook.anomaly.detected when |z| > 3 (both spikes and drops).
 import json
 import math
 import os
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -96,6 +97,29 @@ def log_anomaly(entry: dict) -> None:
         pass
 
 
+def _publish_anomaly(entry: dict, tup: dict) -> None:
+    """Emit nook.anomaly.detected via nook_publish subprocess. Fail-open."""
+    publish_py = Path(__file__).resolve().parent / "nook_publish.py"
+    try:
+        payload = json.dumps({
+            "event": "nook.anomaly.detected",
+            "session_id": os.environ.get("ENCHANTED_SESSION_ID", "unknown"),
+            "plugin": tup.get("plugin", ""),
+            "skill": tup.get("skill", ""),
+            "agent_tier": tup.get("agent_tier", ""),
+            "model": tup.get("model", ""),
+            "z_score": entry.get("z_score"),
+            "detected_at": entry.get("timestamp"),
+        }, separators=(",", ":"))
+        subprocess.run(
+            [sys.executable, str(publish_py)],
+            input=payload, text=True, timeout=5,
+            capture_output=True,
+        )
+    except Exception as exc:
+        print(f"[nook:detect_anomaly] publish failed (non-fatal): {exc}", file=sys.stderr)
+
+
 def main() -> int:
     rows = latest_ledger_rows(MIN_N + 50)
     if not rows:
@@ -155,6 +179,7 @@ def main() -> int:
         "source": source,
     }
     log_anomaly(entry)
+    _publish_anomaly(entry, tup)
 
     # Surface to developer via stderr (the only legitimate mid-session Nook signal)
     print(f"[nook] anomaly ({'spike' if z > 0 else 'drop'}): "

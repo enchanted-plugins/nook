@@ -11,7 +11,7 @@ The developer's query surface into Nook's state. Every state file written by `co
 | `/nook-cost [--session\|--day\|--month]` | Current spend with attribution breakdown | Haiku (formatter) |
 | `/nook-forecast [--session\|--day\|--month]` | L1 forecast with ±2σ band | Sonnet (via cost-tracker/forecaster) |
 | `/nook-attribute [--last=N] [--tool=<name>] [--plugin=<slug>]` | Break down last N calls by attribution axis | Haiku (filter + format) |
-| `/nook-report` | Dark-themed PDF audit with anomaly narrative | Opus (narrator) + Sonnet (rendering) |
+| `/nook-report` | Phase 2 — PDF report (puppeteer pending); Phase 1 emits structured JSONL summary only | Opus (narrator) + Sonnet (rendering) |
 
 ## No hooks
 
@@ -21,7 +21,7 @@ cost-query has zero hook bindings. All invocations are developer-initiated via s
 
 - `/nook-cost` and `/nook-attribute`: plain-text tables for conversation context
 - `/nook-forecast`: plain-text table + optional JSON for scripting (`--json` flag)
-- `/nook-report`: dark-themed single-page PDF at `state/reports/report-YYYY-MM-DD-HHMMSS.pdf`, rendered via `docs/architecture/generate.py` + `docs/assets/puppeteer.config.json`
+- `/nook-report`: Phase 2 — dark-themed single-page PDF at `state/reports/report-YYYY-MM-DD-HHMMSS.pdf` (puppeteer pending); Phase 1 emits structured JSONL summary only
 
 ## Events
 

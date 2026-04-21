@@ -11,6 +11,7 @@ Debounce state lives in plugins/budget-watcher/state/thresholds.jsonl (append-on
 
 import json
 import os
+import subprocess
 import sys
 from datetime import datetime, timezone, date
 from pathlib import Path
@@ -205,6 +206,30 @@ def check_and_fire(counters: dict, budgets: dict) -> list:
     return events
 
 
+def _publish_event(event: dict, publish_py: Path) -> None:
+    """Invoke nook_publish.py subprocess with the event JSON on stdin. Fail-open."""
+    try:
+        payload = json.dumps({
+            "event": event["event"],
+            "scope": event.get("scope", ""),
+            "scope_key": event.get("scope_key", ""),
+            "session_id": event.get("scope_key", ""),
+            "plugin": "budget-watcher",
+            "skill": "check-budget",
+            "threshold": event.get("threshold"),
+            "spend_to_date": event.get("current_usd"),
+            "budget": event.get("ceiling_usd"),
+            "crossed_at": datetime.now(timezone.utc).isoformat(),
+        }, separators=(",", ":"))
+        subprocess.run(
+            [sys.executable, str(publish_py)],
+            input=payload, text=True, timeout=5,
+            capture_output=True,
+        )
+    except Exception as exc:
+        print(f"[nook:check_budget] publish failed (non-fatal): {exc}", file=sys.stderr)
+
+
 def main() -> int:
     row = latest_ledger_row()
     if not row:
@@ -217,11 +242,10 @@ def main() -> int:
     counters = update_counters(row)
     events = check_and_fire(counters, budgets)
 
-    # Emit events. The nook_publish helper handles rate-limiting + bus dispatch.
-    # For now, this is a stub — real implementation would POST to the enchanted-mcp bus.
+    # Emit events via the publisher helper. Rate-limiting is handled by nook_publish.
+    _PUBLISH_PY = Path(__file__).resolve().parent / "nook_publish.py"
     for event in events:
-        # TODO: invoke shared/scripts/nook_publish.py with event as stdin
-        # For now, just log + stderr-warn the developer directly.
+        _publish_event(event, _PUBLISH_PY)
         print(f"[nook] budget {event['threshold']*100:.0f}% crossed: "
               f"{event['scope']}/{event['axis']} at ${event['current_usd']}/${event['ceiling_usd']:.2f}",
               file=sys.stderr)

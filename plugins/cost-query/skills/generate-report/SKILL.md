@@ -9,6 +9,7 @@ description: >
   anomaly.
 model: sonnet
 tools: [Read, Write, Bash]
+phase2_status: "Phase 2 — PDF generation pending (puppeteer + Chrome headless not yet wired). Phase 1 emits structured JSONL summary only."
 ---
 
 # generate-report

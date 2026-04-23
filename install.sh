@@ -91,7 +91,7 @@ cat <<'EOF'
   Once installed, Pech is silent by default — every tool call is observed,
   ledgered, and forecasted without interrupting your flow. The bus fires
   at threshold crossings (50/80/100%), anomaly detections (3σ), and
-  session finalization. Peer plugins (Wixie, Sylph, Fae) subscribe and
+  session finalization. Peer plugins (Wixie, Sylph, Emu) subscribe and
   degrade gracefully under budget pressure.
 
   Developer surfaces:

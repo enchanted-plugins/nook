@@ -16,7 +16,7 @@ Pech's primary hook consumer. Observes every tool call, attributes spend to the 
 - **Hook event:** `PostToolUse` on any tool (the matcher is `.*` — everything gets observed)
 - **Attribution source:** `ENCHANTED_ATTRIBUTION` environment variable set by the firing plugin
 - **Rate card:** read from `shared/rate-card.json`
-- **Token counts:** authoritative from API response `usage` field; falls back to Fae's A2 estimate if API response unavailable
+- **Token counts:** authoritative from API response `usage` field; falls back to Emu's A2 estimate if API response unavailable
 
 ## Outputs
 
@@ -37,10 +37,10 @@ Pech's primary hook consumer. Observes every tool call, attributes spend to the 
 
 **Publishes:** `pech.session.cost.finalized`
 
-**Subscribes:** `fae.api.usage.observed` (authoritative token source)
+**Subscribes:** `emu.api.usage.observed` (authoritative token source)
 
 ## Brand invariants
 
 - Bus emission on `Stop` only, never per-call (see `@shared/conduct/hooks.md` + Pech CLAUDE.md § Behavioral contract 3).
-- Never re-tokenize client-side — API `usage` field is authoritative; Fae's A2 is the fallback estimate.
+- Never re-tokenize client-side — API `usage` field is authoritative; Emu's A2 is the fallback estimate.
 - Per-agent-tier attribution is load-bearing; orphan rate surfaced as health metric.

@@ -35,7 +35,7 @@ Pivots the ledger for diagnostic work. Use this when `/pech-cost` shows a number
 Pech — attribution (last 30 calls, grouped by plugin+tier)
 ──────────────────────────────────────────────────────────────
   wixie / sonnet         18 calls    $1.10  (89%)
-  raven / haiku         9 calls    $0.08  (6.5%)
+  crow / haiku         9 calls    $0.08  (6.5%)
   pech / haiku           2 calls    $0.02  (1.6%)
   orphan                 1 call     $0.03  (2.4%)   ← bug signal
 ──────────────────────────────────────────────────────────────

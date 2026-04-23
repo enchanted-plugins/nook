@@ -35,4 +35,4 @@ Missing sub-plugins degrade gracefully — e.g. `cost-query` without `cost-track
 
 ## Why the meta-plugin exists
 
-Five sub-plugins working together is the intended configuration. The meta-plugin makes that one command instead of five. Fae, Wixie, Raven, Hydra, Sylph all ship `full` for the same reason.
+Five sub-plugins working together is the intended configuration. The meta-plugin makes that one command instead of five. Emu, Wixie, Crow, Hydra, Sylph all ship `full` for the same reason.

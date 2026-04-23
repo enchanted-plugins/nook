@@ -42,7 +42,7 @@ tools: [Read, Write]
 
 ## Handoff
 
-Downstream subscribers: Wixie (switches to cheaper model on 80%+ crossings), Sylph (defers PR polish on 100% crossings), Fae (trims context aggressively on any crossing).
+Downstream subscribers: Wixie (switches to cheaper model on 80%+ crossings), Sylph (defers PR polish on 100% crossings), Emu (trims context aggressively on any crossing).
 
 ## Failure modes
 

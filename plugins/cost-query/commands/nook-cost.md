@@ -31,7 +31,7 @@ Pech — session spend (session_id: 4f2a...9e3d)
 ─────────────────────────────────────────────────────────────
 Total:                                                $1.23
   wixie / convergence-engine / /converge / sonnet     $1.10  (89%)
-  raven / trust-scorer / PostToolUse / haiku        $0.08  (6.5%)
+  crow / trust-scorer / PostToolUse / haiku        $0.08  (6.5%)
   pech / cost-tracker / observe / haiku              $0.02  (1.6%)
   orphan (no ENCHANTED_ATTRIBUTION)                  $0.03  (2.4%)
 ─────────────────────────────────────────────────────────────

@@ -29,7 +29,7 @@ The question this plugin answers: *What did it cost?*
 
 - Teams who need *"where did the budget go?"* in per-plugin / per-tier / per-model granularity, not a single "org total" line.
 - Developers on a personal budget who want honest spend forecasts with confidence bands instead of dashboards that optimize for looking good.
-- Engineers who want peer plugins (Wixie, Sylph, Fae) to **degrade** — not crash — when spend crosses a threshold.
+- Engineers who want peer plugins (Wixie, Sylph, Emu) to **degrade** — not crash — when spend crosses a threshold.
 
 Not for:
 
@@ -62,7 +62,7 @@ Pech doesn't just track spend. It **attributes** — every token, every prompt-c
 
 The core innovation is the **attribution contract**: every enchanted-plugins sibling that dispatches work sets the `ENCHANTED_ATTRIBUTION` environment variable before the call. Pech reads it at `PostToolUse`, looks up the model in `shared/rate-card.json`, applies the prompt-cache modifiers (writes at 1.25×, reads at 0.1×, batch at 0.5×), and writes a ledger row. What Anthropic's console shows as one line of "org total" becomes thirty lines of per-plugin-per-tier-per-model reality.
 
-The diagram below shows the five-subplugin architecture: a Claude Code session flows into `cost-tracker` (L1 + L4 — the primary hook consumer), which feeds `budget-watcher` (L2 + L3 — threshold + anomaly detection) and `pech-learning` (L5 — cross-session pattern accumulation). `rate-card-keeper` holds the committed rate card; `cost-query` is the skill-invoked developer surface. Events hit the enchanted-mcp bus only on threshold crossings and rollups — peer plugins (Wixie, Sylph, Fae) subscribe and degrade gracefully.
+The diagram below shows the five-subplugin architecture: a Claude Code session flows into `cost-tracker` (L1 + L4 — the primary hook consumer), which feeds `budget-watcher` (L2 + L3 — threshold + anomaly detection) and `pech-learning` (L5 — cross-session pattern accumulation). `rate-card-keeper` holds the committed rate card; `cost-query` is the skill-invoked developer surface. Events hit the enchanted-mcp bus only on threshold crossings and rollups — peer plugins (Wixie, Sylph, Emu) subscribe and degrade gracefully.
 
 <p align="center">
   <a href="docs/assets/pipeline.mmd" title="View pipeline source (Mermaid)">
@@ -88,7 +88,7 @@ A single Wixie `/converge` run chains Opus (orchestrator, ~$0.06) → Sonnet (ex
 
 ### Peer plugins degrade from its threshold events
 
-When L2 fires `pech.budget.threshold.crossed` at 80%, the enchanted-mcp bus delivers it to every subscribed sibling. Wixie switches to Haiku for validator-only roles. Sylph defers PR polish to next session. Fae trims context more aggressively. The next 20% of budget buys you careful degradation instead of a silent overrun or a hard kill.
+When L2 fires `pech.budget.threshold.crossed` at 80%, the enchanted-mcp bus delivers it to every subscribed sibling. Wixie switches to Haiku for validator-only roles. Sylph defers PR polish to next session. Emu trims context more aggressively. The next 20% of budget buys you careful degradation instead of a silent overrun or a hard kill.
 
 External tools can't do this. Anthropic's console fires email alerts. LangSmith sends Slack notifications. Neither can make *your other plugins* react, because they don't own the peer plugins.
 
@@ -167,7 +167,7 @@ Once v0.1.0 ships, a first cost report is a single command. Sixty seconds:
 /pech-cost
 ```
 
-Expected: `/pech-cost` prints session spend broken down by plugin × sub-plugin × agent tier × model, with an L1 end-of-month forecast and a ±2σ confidence band against your configured ceiling. Peer plugins (Wixie / Sylph / Fae) react automatically to L2 threshold events — no manual kill switch. See [docs/getting-started.md](docs/getting-started.md) for the full guided first run once the release lands.
+Expected: `/pech-cost` prints session spend broken down by plugin × sub-plugin × agent tier × model, with an L1 end-of-month forecast and a ±2σ confidence band against your configured ceiling. Peer plugins (Wixie / Sylph / Emu) react automatically to L2 threshold events — no manual kill switch. See [docs/getting-started.md](docs/getting-started.md) for the full guided first run once the release lands.
 
 ## 5 Sub-Plugins, 5 Engines, 4 Slash Commands
 
@@ -267,7 +267,7 @@ Where `R`, `W`, `M` are cache read / write / miss token counts; `W_unread` is th
 
 <p align="center"><img src="docs/assets/math/l5-accumulate.svg" alt="mu_{n+1} = (1 - alpha) · mu_n + alpha · y_bar_session, alpha = 0.05"></p>
 
-Slow accumulator: one noisy session barely moves learned μ and σ. Update runs at PreCompact per `(plugin, skill, agent_tier)` attribution key. Persisted in `state/learnings.json` with Fae-A4 atomic serialization (write-to-tmp + fsync + rename). Exported to `shared/learnings.json` under the `pech` section so peer plugins can read Pech's knowledge for their own cost-aware judgments.
+Slow accumulator: one noisy session barely moves learned μ and σ. Update runs at PreCompact per `(plugin, skill, agent_tier)` attribution key. Persisted in `state/learnings.json` with Emu-A4 atomic serialization (write-to-tmp + fsync + rename). Exported to `shared/learnings.json` under the `pech` section so peer plugins can read Pech's knowledge for their own cost-aware judgments.
 
 ---
 
@@ -357,9 +357,9 @@ MIT — see [LICENSE](LICENSE).
 
 ## Role in the ecosystem
 
-Pech is the **cost-ledger layer** (Phase 1, pre-release) — it tallies every token attributed to a specific plugin × sub-plugin × agent tier × model via the `ENCHANTED_ATTRIBUTION` environment variable. Upstream, every peer plugin that dispatches work (Wixie, Sylph, Fae, Lich) sets this variable before the call so Pech can apportion cost honestly. Downstream, Pech emits `pech.budget.threshold.crossed` events on the enchanted-mcp bus; peer plugins subscribe and **degrade gracefully** — Wixie drops to Haiku, Sylph defers polish, Fae trims context.
+Pech is the **cost-ledger layer** (Phase 1, pre-release) — it tallies every token attributed to a specific plugin × sub-plugin × agent tier × model via the `ENCHANTED_ATTRIBUTION` environment variable. Upstream, every peer plugin that dispatches work (Wixie, Sylph, Emu, Lich) sets this variable before the call so Pech can apportion cost honestly. Downstream, Pech emits `pech.budget.threshold.crossed` events on the enchanted-mcp bus; peer plugins subscribe and **degrade gracefully** — Wixie drops to Haiku, Sylph defers polish, Emu trims context.
 
-Pech does not engineer prompts (Wixie's lane), score change trust (Raven's lane), review code (Lich's lane), or pre-emptively kill dispatches to enforce budgets (the degradation model is cooperative, not coercive). It keeps the ledger honest.
+Pech does not engineer prompts (Wixie's lane), score change trust (Crow's lane), review code (Lich's lane), or pre-emptively kill dispatches to enforce budgets (the degradation model is cooperative, not coercive). It keeps the ledger honest.
 
 See [docs/ecosystem.md § Data Flow Between Plugins](docs/ecosystem.md#data-flow-between-plugins) for the full map.
 

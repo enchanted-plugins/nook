@@ -38,7 +38,7 @@ tools: [Read, Write]
      ```
      (p50 and p95 use Welford-style online percentile estimators over the full history — they're informational, not used in L3 anomaly math.)
 4. Increment `n_sessions_accumulated`. Update `last_updated` timestamp.
-5. Write `state/learnings.json` atomically (write-to-tmp + fsync + rename — Fae-A4 pattern).
+5. Write `state/learnings.json` atomically (write-to-tmp + fsync + rename — Emu-A4 pattern).
 6. Append a cross-plugin snapshot to `shared/learnings.json` with `origin: "pech"` and the full patterns map.
 7. Emit `pech.learning.pattern.updated` event (one per PreCompact, not per key).
 

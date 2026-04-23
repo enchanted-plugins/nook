@@ -4,7 +4,7 @@ Quick answers to questions that don't yet have their own doc. For anything deepe
 
 ## What's the difference between Pech and the other siblings?
 
-Pech answers *"what did it cost?"* — it tallies every token, attributes by plugin × sub-plugin × agent tier × model, and forecasts with honest confidence bands. Sibling plugins answer different questions in the same session: Wixie engineers prompts, Fae tracks session context health, Raven watches change trust, Hydra scans for security surface, Sylph coordinates git workflow. All are independent installs. See [docs/ecosystem.md](ecosystem.md) for the full map.
+Pech answers *"what did it cost?"* — it tallies every token, attributes by plugin × sub-plugin × agent tier × model, and forecasts with honest confidence bands. Sibling plugins answer different questions in the same session: Wixie engineers prompts, Emu tracks session context health, Crow watches change trust, Hydra scans for security surface, Sylph coordinates git workflow. All are independent installs. See [docs/ecosystem.md](ecosystem.md) for the full map.
 
 ## Do I need the other siblings to use Pech?
 

@@ -34,7 +34,7 @@ Commands already present in the repo tree:
 
 ## Ecosystem fit
 
-Pech answers the question *"What did it cost?"* in the Five Questions model (see [ecosystem.md](ecosystem.md)). It consumes Fae's token accounting and Hydra's audit trail, aggregates across sessions, and writes back to a per-project ledger.
+Pech answers the question *"What did it cost?"* in the Five Questions model (see [ecosystem.md](ecosystem.md)). It consumes Emu's token accounting and Hydra's audit trail, aggregates across sessions, and writes back to a per-project ledger.
 
 ## Until it ships
 

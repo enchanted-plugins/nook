@@ -6,7 +6,7 @@ PreCompact hook. Reads the current session's ledger, groups by attribution key,
 updates per-developer patterns in plugins/pech-learning/state/learnings.json with
 slow exponential smoothing (α = 0.05). Exports a snapshot to shared/learnings.json.
 
-Atomic write via temp-rename (Fae-A4 pattern).
+Atomic write via temp-rename (Emu-A4 pattern).
 """
 
 import json

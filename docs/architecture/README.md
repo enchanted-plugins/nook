@@ -9,7 +9,7 @@ The generator at [generate.py](generate.py) reads the source-of-truth (`plugins/
 | `highlevel.mmd` | System diagram — Pech's 5 sub-plugins + data flow |
 | `hooks.mmd` | Hook lifecycle per sub-plugin (SessionStart / PostToolUse / PreCompact / Stop) |
 | `lifecycle.mmd` | Session flow — SessionStart rate-card load → PostToolUse ledger/budget → Stop finalization |
-| `dataflow.mmd` | Cross-plugin flow via enchanted-mcp events (fae → pech → peer degradation) |
+| `dataflow.mmd` | Cross-plugin flow via enchanted-mcp events (emu → pech → peer degradation) |
 | `index.html` | Dark-themed single-page explorer combining all four |
 
 ## When to regenerate
@@ -31,7 +31,7 @@ Commit the regenerated `*.mmd` and `index.html` in the same commit that changed 
 
 ## Why generation, not hand-edit
 
-The 5-sibling consensus (fae + wixie + raven + hydra + sylph) treats this as a brand invariant: *diagrams never go stale*. Every sibling's `generate.py` reads the same source shapes and produces the same diagram types. Hand-editing a `.mmd` means the next `generate.py` run silently overwrites your work.
+The 5-sibling consensus (emu + wixie + crow + hydra + sylph) treats this as a brand invariant: *diagrams never go stale*. Every sibling's `generate.py` reads the same source shapes and produces the same diagram types. Hand-editing a `.mmd` means the next `generate.py` run silently overwrites your work.
 
 ## Optional: SVG renders
 

@@ -33,16 +33,16 @@
       "category": "cost-tracking"
     },
     {
-      "name": "pech-learning",
-      "source": "./plugins/pech-learning",
-      "description": "L5 — Gauss Learning (Pech). Per-developer spend pattern accumulation across sessions. 'This /converge run at $0.80 is 3.3× your rolling mean.' Exports to shared/learnings.json.",
-      "category": "self-learning"
-    },
-    {
       "name": "cost-query",
       "source": "./plugins/cost-query",
       "description": "Developer-facing query surface. /pech-cost, /pech-forecast, /pech-attribute, /pech-report slash commands. Opus orchestrator for anomaly triage.",
       "category": "developer-ux"
+    },
+    {
+      "name": "nook-learning",
+      "source": "./plugins/nook-learning",
+      "description": "L5 Gauss Learning (Pech). Per-developer spend-pattern accumulation across sessions. Builds weighted moving averages of cost-per-(skill, session_type, model) so anomaly detection has meaningful μ after the first 30 calls. Emu-A4 atomic serialization. Exports to shared/learnings.json for cross-plugin intelligence.",
+      "category": "plugin"
     }
   ]
 }

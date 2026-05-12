@@ -169,16 +169,13 @@ bash <(curl -s https://raw.githubusercontent.com/enchanter-ai/pech/main/install.
 
 ## Quickstart
 
-Once v0.1.0 ships, a first cost report is a single command. Sixty seconds:
-
-```
-/plugin install full@pech
-# ...run any Claude Code session...
-/pech-cost
+```bash
+git clone https://github.com/enchanter-ai/pech
+cd pech
+./scripts/bootstrap.sh    # canonical first command — installs enchanter-foundations sibling
 ```
 
-Expected: `/pech-cost` prints session spend broken down by plugin × sub-plugin × agent tier × model, with an L1 end-of-month forecast and a ±2σ confidence band against your configured ceiling. Peer plugins (Wixie / Sylph / Emu) react automatically to L2 threshold events — no manual kill switch. See [docs/getting-started.md](docs/getting-started.md) for the full guided first run once the release lands.
-
+Without `./scripts/bootstrap.sh`, conduct imports will silently miss and Claude Code's `@`-loader will fail-soft. Always bootstrap first.
 ## 6 Sub-Plugins, 5 Core Engines, 4 Slash Commands
 
 Five **core sub-plugins** (cost-ledger lineup) plus one **cost-control utility** (`rate-limiter`, added 2026-05-05) for runaway-loop detection. License compliance (`license-gate`) and SBOM emission (`sbom-emitter`) live in [hydra](https://github.com/enchanter-ai/hydra) — they are supply-chain / compliance concerns, not cost.
